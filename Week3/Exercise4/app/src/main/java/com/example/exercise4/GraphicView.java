@@ -12,10 +12,14 @@ import android.view.View;
 public class GraphicView extends View {
     Bitmap[] frames = new Bitmap[16]; // 16 frames
     int i = 0;
+    long last_tick = 0;
+    long period=200;
+    Context ctext;
     MediaPlayer mediaPlayer;
 
     public GraphicView(Context context) {
         super(context);
+        ctext=context;
 
         frames[0] = BitmapFactory.decodeResource(getResources(), R.drawable.img1);
         frames[1] = BitmapFactory.decodeResource(getResources(), R.drawable.img2);
@@ -41,24 +45,25 @@ public class GraphicView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (i < 16) {
+        if (i < 16)
+        {
+            long time = (System.currentTimeMillis() - last_tick);
+            if (time >= period)
+            {
+            last_tick = System.currentTimeMillis();
             canvas.drawBitmap(frames[i], 40, 40, new Paint());
-        } else {
-            i = 0;
+            i ++;
+            postInvalidate();
+            }
+        else
+        {
+            canvas.drawBitmap(frames[i],40,40, new Paint());
+            postInvalidate();
         }
-        invalidate();
     }
+        else {
+        i=0;
+        postInvalidate();
+        }
+    }}
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        i++;
-        return true;
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mediaPlayer.stop();
-        mediaPlayer.release();
-    }
-}
